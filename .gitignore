@@ -1,0 +1,4 @@
+/papers/*.pdf
+/src/*.pdf
+/src/*.gz
+/templates

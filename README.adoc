@@ -1,0 +1,77 @@
+= Multithreaded Debugging
+
+Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
+
+== Title ideas
+
+* Tools for finding concurrency bugs in Golang programs
+* Debugging event-based concurrency issues in server architectures
+
+== Outline
+
+1. Abstract
+2. Introduction to non-determinism due to concurrency
+3. 
+
+== Papers
+
+|===
+|Title |Bibtex |PDF
+
+|Isolating Failure-Inducing Thread Schedules
+|acm2002
+|link:papers/acm2002.pdf[]
+
+|Sparse Record and Replay with Controlled Scheduling
+|lidbury2019sparse
+|link:papers/lidbury2019sparse.pdf[]
+
+|Engineering Record And Replay For Deployability
+|o2017engineering
+|link:papers/o2017engineering.pdf[]
+
+|Testing and Debugging Concurrency Bugs in Event-Driven Programs
+|tchamgoue2012testing
+|link:papers/tchamgoue2012testing.pdf[]
+
+|Finding concurrency bugs with context-aware communication graphs
+|lucia2009concurrency
+|link:papers/lucia2009concurrency.pdf[]
+
+|ConSeq: Detecting Concurrency Bugs through Sequential Errors
+|zhan2011conseq
+|link:papers/zhan2011conseq.pdf[]
+
+|MUVI: Automatically Inferring Multi-Variable Access Correlations and Detecting Related Semantic and Concurrency Bugs
+|lu2007muvi
+|link:papers/lu2007muvi.pdf[]
+
+|Understanding Real-World Concurrency Bugs in Go
+|tu2019go
+|link:papers/tu2019go.pdf[]
+
+|Instrumenting Where It Hurts: An Automatic Concurrent Debugging Technique
+|tzoref2007instrumenting
+|link:papers/tzoref2007instrumenting.pdf[]
+
+|Learning from Mistakes: A Comprehensive Study on Real World Concurrency Bug Characteristics
+|lu2008mistakes
+|link:papers/lu2008mistakes.pdf[]
+
+|===
+
+== Resources
+
+=== Mozilla rr
+* https://rr-project.org/
+* https://github.com/mozilla/rr
+
+=== Golang
+* https://github.com/go-delve/delve
+
+
+== License
+
+Copyright 2020 Marvin Strangfeld
+
+Paper licensed under Creative Commons Attribution 4.0 International
