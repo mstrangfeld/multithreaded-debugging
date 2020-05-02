@@ -63,20 +63,47 @@ Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 |lu2008mistakes
 |link:papers/lu2008mistakes.pdf[]
 
+|ThreadSanitizer – data race detection in practice
+|serebry2009threadsanatizer
+|link:papers/serebry2009threadsanatizer.pdf[]
+
+|Beautiful concurrency
+|beytonjones2007beautiful
+|link:papers/beytonjones2007beautiful.pdf[]
+
+|KISS: keep it simple and sequential
+|qadeer2004kiss
+|link:papers/qadeer2004kiss.pdf[]
+
+|Finding and Reproducing Heisenbugs in Concurrent Programs
+|musuvathi2008finding
+|link:papers/musuvathi2008finding.pdf[]
+
 |===
 
-== Resources
 
-=== Mozilla rr
+== Topics to write about
+* data race bugs and detection
+* deadlock bugs and detection
+* atomicity-violation bugs
+* order-violation bugs
+* transactional memory in language design
+** Can it prevent concurrency bugs?
+* Famous concurrency bugs
+** Therac-25
+** Northeast blackout of 2003
+
+== Resources
 * https://rr-project.org/
 * https://github.com/mozilla/rr
-
-=== Golang
 * https://github.com/go-delve/delve
-
+* https://golang.org/doc/articles/race_detector.html
+* https://github.com/google/sanitizers/wiki/ThreadSanitizerGoManual
+* https://valgrind.org/
+* https://fbinfer.com/
 
 == License
 
-Copyright 2020 Marvin Strangfeld
+Copyright (C) 2020 Marvin Strangfeld
 
 Paper licensed under Creative Commons Attribution 4.0 International
