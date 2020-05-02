@@ -1,0 +1,68 @@
+= Summaries
+
+== Understanding Real-World Concurrency Bugs in Go (tu2019go)
+* concurrency are the most difficult to debug and most widely studied
+* 2 existing go bug detectors **Which ones?**
+* blocking bugs vs non-blocking bugs
+* buffered vs unbuffered channels
+* Go runtime maps goroutines to Kernel threads
+* goroutines using anonymous functions
+** => Data races
+* Context and Pipe can introduce new Types of concurrency bugs
+* Goroutines are shorter but created more frequently than C threads
+* Goroutine leaks
+* **message passing produces more errors than share memory**
+* blocking bugs due to false shared memory protection can be detected pretty well
+
+== Instrumenting Where it Hurts — An Automatic Concurrent Debugging Technique (tzoref207instrumenting)
+* using AI to pinpoint bugs with delta-debugging
+
+== Learning from Mistakes - A Comprehensive Study on Real World Concurrency Bug Characteristics (lu2008mistakes)
+* "Unfortunately, Writing correct concurrent programs is difficult"
+* "Around one third of the examined non-deadlock concurrency bugs are caused by violation to programmers' order intentions,which may not be easily expressed via synchronization primitives like locks and transactional memories"
+* "Around 34% of the examined non-deadlock concurrency bugs involve multiple variables, which are not well addressed by existing bug detection tools"
+* "About 92% of the examined concurrency bugs can be reliably triggered by enforcing certain orders among no more than 4 memory accesses"
+* "About 73% of the examined non-deadlock concurrency bugs were not fixed by simply adding or changing locks, and many of the fixes were not correct at the first try, indicating the difficulty of reasoning concurrent execution by programmers"
+* "Most programmers think sequentially and therefore they make mistakes easily when writing concurrent programs."
+* Testing mostly covers sequential errors
+* While there has been attempts to use testing techniques to check concurrency bugs by injecting delays, it is unclear if this really works.
+* Reporting concurrency bugs is hard due to their non-determinism they can occur randomly among different users
+* "Almost 96% of the examined concurrency bugs are guaranteed to manifest if certain partial order between 2 threads is enforced."
+** => "Pairwise testing on concurrent program threads can expose most concurrency bugs, and greatly reduce the testing complexity."
+* "Transactional Memory can help avoid about one third (39%) of the examined concurrency bugs."
+** => "Transactional memory (TM) is a promising language feature for programmers"
+* "... data-race free does not mean concurrency bug free." [12,23]
+* "Most of the examined non-deadlock concurrency bugs are covered by two simple patterns: atomicity-violation and order-violation"
+* "Adding or changing locks is not the major fix strategy."
+* "There is no silver bullet for fixing concurrency bugs. Just telling programmers that certain conflicting accesses are not protected by the same lock is not enough to fix concurrency bugs."
+
+== Engineering Record And Replay For Deployability (o2017engineering)
+* by using __Mozilla rr__ it is possible to deploy lightweight record and replay to production
+* previously it was necessary to either record an entire virtual machine, running on a modified OS kernel or injecting instrumentation at compile-time
+* main performance bottleneck is context switching by using __ptrace__ to monitor system calls
+* "The inputs and sources of nondeterminism are mainly the results of system calls, and the timing of asynchronous events."
+* running only one thread at a time on a fixed CPU core
+* for programs that do not heavily depend on parallelism the overhead is less than a factor of two.
+
+== Testing and Debugging Concurrency Bugs in Event-Driven Programs (tchamgoue2012testing)
+* "Asynchronous events introduce logical concurrency into these programs making them hard to be thoroughly tested and debugged."
+* three groups of tools: testing methods, static analysis, dynamic analysis
+* "A program is event-driven when a considerable amount of its computation is initiated and influenced by external events like interrupts and/or signals."
+* Common in embedded world (IoT) to sensor and interact with the world
+* Figure 2: A Taxonomy of Concurrency Bugs
+* Double free bug: Confusion over which part of the application is responsible for freeing a shared memory area.
+** => undefined behavior and potential vulnerability
+* Use after free: Accessing an already freed memory area
+** => memory corruption and potential vulnerability
+* Dangerous event handlers enabled in sensitive operations: events can occur anytime and therefore overlap in critical regions
+* Unsafe functions: functions that can not run concurrently in the same address space without creating the potential for inconsistent states.
+* Non-Returning Event Handlers: event handlers that either terminating the program or jumping to another part of the program
+* Non Atomic Instructions Assumed to Be Atomic
+** Example: `++` expands during compilation to three machine instructions: load, increment, store
+** load-store bug pattern
+* Interleaving Assumed Never To Occur: mistakes by programmers that assume certain pre-conditions that are not always met
+* Test and Use: `if(ptr!=NULL) ptr=ptr->Next;`
+* Blocking Synchronization: Misusing the locking mechanism
+* Blocking Operations: Using blocking operations in event handlers "can penalize and even paralyze the entire program execution."
+** Using file system blocking operations in event handlers
+* "Detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job."
