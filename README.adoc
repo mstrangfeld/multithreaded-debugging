@@ -79,6 +79,10 @@ Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 |musuvathi2008finding
 |link:papers/musuvathi2008finding.pdf[]
 
+|Why do computers stop and what can be done about it?
+|gray1986computers
+|link:papers/gray1986computers.pdf[]
+
 |===
 
 
@@ -93,6 +97,11 @@ Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 ** Therac-25
 ** Northeast blackout of 2003
 
+== Quotes
+* "If debugging is the process of removing software bugs, then programming must be the process of putting them in." ~ Edsger W. Dijkstra
+* "Everyone knows that debugging is twice as hard as writing a program in the first place. So if you're as clever as you can be when you write it, how will you ever debug it?" ~ Brian Kernighan
+* "The most effective debugging tool is still careful thought, coupled with judiciously placed print statements." ~ Brian Kernighan
+
 == Resources
 * https://rr-project.org/
 * https://github.com/mozilla/rr
@@ -101,6 +110,7 @@ Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 * https://github.com/google/sanitizers/wiki/ThreadSanitizerGoManual
 * https://valgrind.org/
 * https://fbinfer.com/
+
 
 == License
 

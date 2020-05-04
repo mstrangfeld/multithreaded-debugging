@@ -66,3 +66,22 @@
 * Blocking Operations: Using blocking operations in event handlers "can penalize and even paralyze the entire program execution."
 ** Using file system blocking operations in event handlers
 * "Detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job."
+
+== KISS: Keep It Simple and Sequential (qadeer2004kiss)
+* Model checking is complex due to the number of possible thread interleavings is exponentially big
+* Transforming concurrent programs in sequential programs to use sequential model checkers
+* "[Dynamic analysis tools] ... are easy to use but their coverage is typically small since only a few executions are explored."
+
+== Beautiful concurrency (beytonjones2007beautiful)
+* "... today’s dominant technology for concurrent programming – locks and condition variables – is fundamentally flawed."
+* ATM as one possibility to ensure there are no side-effects and no data races
+
+== Finding and Reproducing Heisenbugs in Concurrent Programs (musuvathi2008finding)
+* "Heisenbugs" are "extremely difficult to reproduce and eliminate"
+* Dynamic testing tools need to avoid perturbing the program because this might change the behavior
+* Tools need to explore the thread interleavings which can grow exponentially
+** => Algorithms are needed to decide which one to explore
+
+== Why do computers stop and what can be done about it? (gray1986computers)
+* "The assertion that most production software bugs are soft -- Heisenbugs that go away when you look at them -- is well known to systems programmers. Bohrbugs, like the Bohr atom, are solid, easily detected by standard techniques, and hence boring. But Heisenbugs may elude a bugcatcher for years of execution. Indeed, the bugcatcher may perturb the situation just enough to make the Heisenbug disappear. This is analogous to the Heisenberg Uncertainty Principle in Physics."
+
