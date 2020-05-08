@@ -64,7 +64,7 @@ Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 |link:papers/lu2008mistakes.pdf[]
 
 |ThreadSanitizer – data race detection in practice
-|serebry2009threadsanatizer
+|serebry2009threadsanitizer
 |link:papers/serebry2009threadsanatizer.pdf[]
 
 |Beautiful concurrency

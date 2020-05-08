@@ -1,87 +1,110 @@
 = Summaries
 
+== Isolating Failure-Inducing Thread Schedules (acm2002)
+* [ ] "By systematically narrowing down the difference between a thread schedule that makes the program pass and another schedule that makes the program fail, the Delta Debugging approach can pinpoint the error location automatically -- namely the location(s) where a thread switch causes the program to fail."
+* [ ] "While having non-determinism is convenient for parallel programming, non-determinism makes it hard to reproduce a failure."
+* [ ] Dejavu automatically generates test cases for testing the alternated schedules
+* [ ] "Static analysis attempts to identify the statements that may happen in parallel or not; this is a prerequisite for detecting data races statically. A wide range of methods has been proposed and evaluated for detecting deadlocks statically. Dynamic analysis can detect shared memory accesses at run time. All these approaches require complete knowledge about the program to be analyzed."
+
+
 == Understanding Real-World Concurrency Bugs in Go (tu2019go)
-* concurrency are the most difficult to debug and most widely studied
-* 2 existing go bug detectors **Which ones?**
-* blocking bugs vs non-blocking bugs
-* buffered vs unbuffered channels
-* Go runtime maps goroutines to Kernel threads
-* goroutines using anonymous functions
+* [x] concurrency are the most difficult to debug and most widely studied
+* [ ] two existing go bug detectors **Which ones?**
+* [x] blocking bugs vs non-blocking bugs
+* [x] buffered vs unbuffered channels
+* [ ] Go runtime maps goroutines to Kernel threads
+* [ ] goroutines using anonymous functions
 ** => Data races
-* Context and Pipe can introduce new Types of concurrency bugs
-* Goroutines are shorter but created more frequently than C threads
-* Goroutine leaks
-* **message passing produces more errors than share memory**
-* blocking bugs due to false shared memory protection can be detected pretty well
+* [ ] Context and Pipe can introduce new Types of concurrency bugs
+* [x] Goroutines are shorter but created more frequently than C threads
+* [ ] Goroutine leaks
+* [ ] **message passing produces more errors than share memory**
+* [ ] blocking bugs due to false shared memory protection can be detected pretty well
 
 == Instrumenting Where it Hurts — An Automatic Concurrent Debugging Technique (tzoref207instrumenting)
-* using AI to pinpoint bugs with delta-debugging
+* [ ] using AI to pinpoint bugs with delta-debugging
 
 == Learning from Mistakes - A Comprehensive Study on Real World Concurrency Bug Characteristics (lu2008mistakes)
-* "Unfortunately, Writing correct concurrent programs is difficult"
-* "Around one third of the examined non-deadlock concurrency bugs are caused by violation to programmers' order intentions,which may not be easily expressed via synchronization primitives like locks and transactional memories"
-* "Around 34% of the examined non-deadlock concurrency bugs involve multiple variables, which are not well addressed by existing bug detection tools"
-* "About 92% of the examined concurrency bugs can be reliably triggered by enforcing certain orders among no more than 4 memory accesses"
-* "About 73% of the examined non-deadlock concurrency bugs were not fixed by simply adding or changing locks, and many of the fixes were not correct at the first try, indicating the difficulty of reasoning concurrent execution by programmers"
-* "Most programmers think sequentially and therefore they make mistakes easily when writing concurrent programs."
-* Testing mostly covers sequential errors
-* While there has been attempts to use testing techniques to check concurrency bugs by injecting delays, it is unclear if this really works.
-* Reporting concurrency bugs is hard due to their non-determinism they can occur randomly among different users
-* "Almost 96% of the examined concurrency bugs are guaranteed to manifest if certain partial order between 2 threads is enforced."
+* [ ] "Unfortunately, Writing correct concurrent programs is difficult"
+* [ ] "Around one third of the examined non-deadlock concurrency bugs are caused by violation to programmers' order intentions,which may not be easily expressed via synchronization primitives like locks and transactional memories"
+* [ ] "Around 34% of the examined non-deadlock concurrency bugs involve multiple variables, which are not well addressed by existing bug detection tools"
+* [ ] "About 92% of the examined concurrency bugs can be reliably triggered by enforcing certain orders among no more than 4 memory accesses"
+* [ ] "About 73% of the examined non-deadlock concurrency bugs were not fixed by simply adding or changing locks, and many of the fixes were not correct at the first try, indicating the difficulty of reasoning concurrent execution by programmers"
+* [ ] "Most programmers think sequentially and therefore they make mistakes easily when writing concurrent programs."
+* [ ] Testing mostly covers sequential errors
+* [ ] While there has been attempts to use testing techniques to check concurrency bugs by injecting delays, it is unclear if this really works.
+* [ ] Reporting concurrency bugs is hard due to their non-determinism they can occur randomly among different users
+* [ ] "Almost 96% of the examined concurrency bugs are guaranteed to manifest if certain partial order between 2 threads is enforced."
 ** => "Pairwise testing on concurrent program threads can expose most concurrency bugs, and greatly reduce the testing complexity."
-* "Transactional Memory can help avoid about one third (39%) of the examined concurrency bugs."
+* [ ] "Transactional Memory can help avoid about one third (39%) of the examined concurrency bugs."
 ** => "Transactional memory (TM) is a promising language feature for programmers"
-* "... data-race free does not mean concurrency bug free." [12,23]
-* "Most of the examined non-deadlock concurrency bugs are covered by two simple patterns: atomicity-violation and order-violation"
-* "Adding or changing locks is not the major fix strategy."
-* "There is no silver bullet for fixing concurrency bugs. Just telling programmers that certain conflicting accesses are not protected by the same lock is not enough to fix concurrency bugs."
+* [ ] "... data-race free does not mean concurrency bug free." [12,23]
+* [ ] "Most of the examined non-deadlock concurrency bugs are covered by two simple patterns: atomicity-violation and order-violation"
+* [ ] "Adding or changing locks is not the major fix strategy."
+* [ ] "There is no silver bullet for fixing concurrency bugs. Just telling programmers that certain conflicting accesses are not protected by the same lock is not enough to fix concurrency bugs."
 
 == Engineering Record And Replay For Deployability (o2017engineering)
-* by using __Mozilla rr__ it is possible to deploy lightweight record and replay to production
-* previously it was necessary to either record an entire virtual machine, running on a modified OS kernel or injecting instrumentation at compile-time
-* main performance bottleneck is context switching by using __ptrace__ to monitor system calls
-* "The inputs and sources of nondeterminism are mainly the results of system calls, and the timing of asynchronous events."
-* running only one thread at a time on a fixed CPU core
-* for programs that do not heavily depend on parallelism the overhead is less than a factor of two.
+* [ ] by using __Mozilla rr__ it is possible to deploy lightweight record and replay to production
+* [ ] previously it was necessary to either record an entire virtual machine, running on a modified OS kernel or injecting instrumentation at compile-time
+* [ ] main performance bottleneck is context switching by using __ptrace__ to monitor system calls
+* [ ] "The inputs and sources of nondeterminism are mainly the results of system calls, and the timing of asynchronous events."
+* [ ] running only one thread at a time on a fixed CPU core
+* [ ] for programs that do not heavily depend on parallelism the overhead is less than a factor of two.
 
 == Testing and Debugging Concurrency Bugs in Event-Driven Programs (tchamgoue2012testing)
-* "Asynchronous events introduce logical concurrency into these programs making them hard to be thoroughly tested and debugged."
-* three groups of tools: testing methods, static analysis, dynamic analysis
-* "A program is event-driven when a considerable amount of its computation is initiated and influenced by external events like interrupts and/or signals."
-* Common in embedded world (IoT) to sensor and interact with the world
-* Figure 2: A Taxonomy of Concurrency Bugs
-* Double free bug: Confusion over which part of the application is responsible for freeing a shared memory area.
+* [ ] "Asynchronous events introduce logical concurrency into these programs making them hard to be thoroughly tested and debugged."
+* [x] three groups of tools: testing methods, static analysis, dynamic analysis
+* [ ] "A program is event-driven when a considerable amount of its computation is initiated and influenced by external events like interrupts and/or signals."
+* [ ] Common in embedded world (IoT) to sensor and interact with the world
+* [x] Figure 2: A Taxonomy of Concurrency Bugs
+* [ ] Double free bug: Confusion over which part of the application is responsible for freeing a shared memory area.
 ** => undefined behavior and potential vulnerability
-* Use after free: Accessing an already freed memory area
+* [ ] Use after free: Accessing an already freed memory area
 ** => memory corruption and potential vulnerability
-* Dangerous event handlers enabled in sensitive operations: events can occur anytime and therefore overlap in critical regions
-* Unsafe functions: functions that can not run concurrently in the same address space without creating the potential for inconsistent states.
-* Non-Returning Event Handlers: event handlers that either terminating the program or jumping to another part of the program
-* Non Atomic Instructions Assumed to Be Atomic
+* [ ] Dangerous event handlers enabled in sensitive operations: events can occur anytime and therefore overlap in critical regions
+* [ ] Unsafe functions: functions that can not run concurrently in the same address space without creating the potential for inconsistent states.
+* [ ] Non-Returning Event Handlers: event handlers that either terminating the program or jumping to another part of the program
+* [x] Non Atomic Instructions Assumed to Be Atomic
 ** Example: `++` expands during compilation to three machine instructions: load, increment, store
 ** load-store bug pattern
-* Interleaving Assumed Never To Occur: mistakes by programmers that assume certain pre-conditions that are not always met
-* Test and Use: `if(ptr!=NULL) ptr=ptr->Next;`
-* Blocking Synchronization: Misusing the locking mechanism
-* Blocking Operations: Using blocking operations in event handlers "can penalize and even paralyze the entire program execution."
+* [ ] Interleaving Assumed Never To Occur: mistakes by programmers that assume certain pre-conditions that are not always met
+* [x] Test and Use: `if(ptr!=NULL) ptr=ptr->Next;`
+* [ ] Blocking Synchronization: Misusing the locking mechanism
+* [ ] Blocking Operations: Using blocking operations in event handlers "can penalize and even paralyze the entire program execution."
 ** Using file system blocking operations in event handlers
-* "Detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job."
+* [ ] "Detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job."
 
 == KISS: Keep It Simple and Sequential (qadeer2004kiss)
-* Model checking is complex due to the number of possible thread interleavings is exponentially big
-* Transforming concurrent programs in sequential programs to use sequential model checkers
-* "[Dynamic analysis tools] ... are easy to use but their coverage is typically small since only a few executions are explored."
+* [ ] Model checking is complex due to the number of possible thread interleavings is exponentially big
+* [ ] Transforming concurrent programs in sequential programs to use sequential model checkers
+* [ ] "[Dynamic analysis tools] ... are easy to use but their coverage is typically small since only a few executions are explored."
 
 == Beautiful concurrency (beytonjones2007beautiful)
-* "... today’s dominant technology for concurrent programming – locks and condition variables – is fundamentally flawed."
-* ATM as one possibility to ensure there are no side-effects and no data races
+* [ ] "... today’s dominant technology for concurrent programming – locks and condition variables – is fundamentally flawed."
+* [ ] ATM as one possibility to ensure there are no side-effects and no data races
 
 == Finding and Reproducing Heisenbugs in Concurrent Programs (musuvathi2008finding)
-* "Heisenbugs" are "extremely difficult to reproduce and eliminate"
-* Dynamic testing tools need to avoid perturbing the program because this might change the behavior
-* Tools need to explore the thread interleavings which can grow exponentially
+* [ ] "Heisenbugs" are "extremely difficult to reproduce and eliminate"
+* [ ] Dynamic testing tools need to avoid perturbing the program because this might change the behavior
+* [ ] Tools need to explore the thread interleavings which can grow exponentially
 ** => Algorithms are needed to decide which one to explore
 
 == Why do computers stop and what can be done about it? (gray1986computers)
-* "The assertion that most production software bugs are soft -- Heisenbugs that go away when you look at them -- is well known to systems programmers. Bohrbugs, like the Bohr atom, are solid, easily detected by standard techniques, and hence boring. But Heisenbugs may elude a bugcatcher for years of execution. Indeed, the bugcatcher may perturb the situation just enough to make the Heisenbug disappear. This is analogous to the Heisenberg Uncertainty Principle in Physics."
+* [x] "The assertion that most production software bugs are soft -- Heisenbugs that go away when you look at them -- is well known to systems programmers. Bohrbugs, like the Bohr atom, are solid, easily detected by standard techniques, and hence boring. But Heisenbugs may elude a bugcatcher for years of execution. Indeed, the bugcatcher may perturb the situation just enough to make the Heisenbug disappear. This is analogous to the Heisenberg Uncertainty Principle in Physics."
+
+== ThreadSanitizer – data race detection in practice (serebry2009threadsanitizer)
+* [ ] "A data race is a situation when two threads concurrently access ashared memory location and at leas one of the accesses is a write."
+* [ ] "..., a successful pass of all test doesn't guarantee the absence of data races."
+* [ ] "The three basic types of detection techniques are: static, on-the-fly and postmortem."
+* [ ] "On-the-fly and postmortem techniques are often referred to as dynamic"
+* [ ] Static data race detectors are unfeasible for large code bases
+* [ ] Dynamic data race detectors use these algorithms: happens-before, lockset or both (hybrid)
+* [ ] "[ThreadSanatizer] observes the program execution as a sequence of events."
+* [ ] Locking events -> WRLOCK, RDLOCK, WRUNLOCK, RDUNLOCK
+* [ ] Happens-before events are SIGNAL and WAIT
+* [ ] "Any dynamic race detector must understand the synchronization mechanisms used by the tested program, otherwise the detector will not work."
+** Dynamic annotations need to be compiled into the code, so the detector can understand the synchronizations
+* [ ] If the detector is to slow, time-sensitive applications might fail due to protocol time-outs
+* [ ] Slow-down usually by a factor of 20-50 but in "extreme cases" up to 10000 and down to 2
+* [ ] Better performance by ignoring certain uncritical regions
 
