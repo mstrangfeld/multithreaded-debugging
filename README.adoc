@@ -1,21 +1,19 @@
-= Multithreaded Debugging
+= Finding Concurrency Bugs in Production
 
 Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 
-== Title ideas
-
-* Tools for finding concurrency bugs in Golang programs
-* Debugging methods suited for Golang's concurrency model
-* Debugging event-based concurrency issues in server architectures
-* Automated bug-finding with record and replay in Golang's concurrency model
-
 == Outline
 
-1. Abstract
-2. Golang and it's concurrency model
-2. Introduction to non-determinism due to concurrency and types of concurrency bugs
-3. Record and Replay
-4. Evaluation which bugs can be detected
+1. Introduction
+A. Heisenbugs
+B. Table of Contents
+2. Taxonomy of Concurrency Bugs
+A. Deadlocks
+B. Data Races
+C. Atomicity and Order Violations
+3. Dynamic Code Analysis
+3. Concurrency-Aware Testing
+4. Static Code Analysis
 5. Conclusion
 
 == Papers
