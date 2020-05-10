@@ -2,11 +2,14 @@
 
 Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 
+IMPORTANT: Work in progress! As soon as the paper is finished, there will be a PDF to download in the release section
+
 == Outline
 
 1. Introduction
 A. Heisenbugs
-B. Table of Contents
+B. Go Programming Language
+C. Table of Contents
 2. Taxonomy of Concurrency Bugs
 A. Deadlocks
 B. Data Races
