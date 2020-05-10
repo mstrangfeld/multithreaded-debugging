@@ -70,8 +70,8 @@ C. Atomicity and Order Violations
 |link:papers/serebry2009threadsanatizer.pdf[]
 
 |Beautiful concurrency
-|beytonjones2007beautiful
-|link:papers/beytonjones2007beautiful.pdf[]
+|peytonjones2007beautiful
+|link:papers/peytonjones2007beautiful.pdf[]
 
 |KISS: keep it simple and sequential
 |qadeer2004kiss

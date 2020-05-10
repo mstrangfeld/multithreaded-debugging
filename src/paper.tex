@@ -73,14 +73,19 @@ Today's computer architectures rely more and more on parallel computing.
 Single core processors were widely replaced by multi-core architectures optimized to run processes and threads concurrently.
 To utilize the full performance of the given hardware, programmers need to write their software with a high degree of parallelism.
 This introduces the potential for bugs that would not occur in sequential programs due to non-determinism in the order of execution.
-For this purpose tools and languages have been developed to ease the creation of concurrency-aware programs and help programmers find concurrency bugs effectively.
-This paper will evaluate the different tools and techniques that are available to find, reproduce and fix concurrency bugs from the viewpoint of how usable they are in a production environment.
+Such bugs can be very challenging to fix because they are not easily reproducible.
+For this purpose tools and languages have been developed to ease the creation of concurrency-aware programs and to help programmers find concurrency bugs effectively.
+This paper will evaluate three different techniques and concrete tool implementations of them, that are available to find, reproduce and fix concurrency bugs from the viewpoint of how usable they are in a production environment.
 The requirements for these tools are that they need to be easy to deploy, they should bring only a minimal computational and storage overhead, they should have a high coverage with minimal false-positive reports and they need to enable the developer to quickly find the cause of a bug.
+The techniques evaluated are: Dynamic code analysis with the record and replay tool rr and the data race detector ThreadSanitizer.
+Concurrency-aware testing with a combined approach of evaluating thread schedules with delta-debugging to automatically pinpoint concurrency bugs.
+Static code analysis with the methods of sequentialization and model-checking.
 All tools are evaluated for the Go programming language but the concepts are mainly applicable to every other language as well.
 \end{abstract}
 
 \begin{IEEEkeywords}
-    [Software Engineering]: Testing and Debugging
+    [Software Engineering]: Software testing and Debugging
+    [Computing methodologies]: Concurrent programming languages
 \end{IEEEkeywords}
 
 
@@ -139,11 +144,11 @@ Together with the increasing popularity of the language, the demand for producti
 
 \subsection{Table of Contents}
 
-\Cref{sct:taxonomy} gives a brief introduction on the different types of concurrency bugs and their main causes.
-\Cref{sct:dynamic} covers some techniques to dynamically detect concurrency bugs and reliably reproduce them.
-\Cref{sct:testing} shows different methods of concurrency-aware testing to detect concurrency bugs automatically by manipulating the thread scheduler.
-And \Cref{sct:static} finally covers how to detect concurrency bugs with static code analysis.
-In the end there is a conclusion with a short outlook on the possible future of multi-threaded debugging.
+\Cref{sct:taxonomy} gives a brief introduction on the different types of concurrency bugs and their main causes: Deadlocks, Data races and Atomicity and Order violations.
+\Cref{sct:dynamic} covers some techniques to dynamically detect concurrency bugs, reliably reproduce them by utilizing record and replay with the tool \emph{rr} and detect data races dynamically with the tool \emph{ThreadSanitizer}.
+\Cref{sct:testing} shows different methods of concurrency-aware testing to detect concurrency bugs automatically by manipulating the thread scheduler and delta debugging.
+And \Cref{sct:static} finally covers how to detect concurrency bugs with static code analysis by sequentialization and model-checking.
+In the end there is a conclusion with a short comparison of all techniques and a quick outlook on the possible future of multi-threaded debugging.
 
 
 % ------------------------------------ %
@@ -166,9 +171,9 @@ The manifestation of these kind of bugs is very noticeable because the whole app
 Non-blocking bugs are often harder to find because they can occur even when the termination of a program was successful but the result is wrong.
 This can also lead to a cascade of bugs where the root cause is a non-blocking concurrency bug which might not be obvious.
 
-For example: A method concurrently creates a list of numbers that is expected to be ordered but due to a non-blocking concurrency bug the list contains unordered elements.
-This failure might only occur once in a thousand executions due to the exponentially growing number of possible thread interleavings.
-But if other methods depend on the correct order of elements in this list, the program might crash or generate wrong results and the reason can be very hard to find.
+For example: A method concurrently creates a list of numbers that is expected to be ordered but due to a non-blocking concurrency bug the list suddenly contains unordered elements.
+This failure might only occur once in a thousand executions or even less, due to the exponentially growing number of possible thread interleavings.
+But if other methods depend on the correct order of the elements in this list, the program might crash or generate wrong results and the reason can be very hard to find.
 
 \subsection{Deadlocks}
 \begin{lstlisting}[float=h, language=Go, label=lst:deadlockWG, caption=Deadlock caused by waiting for the \emph{WaitGroup} at a wrong location -- based on \cite{tu2019go}]
@@ -188,6 +193,7 @@ func main() {
 The most commonly manifestation of blocking bugs are \emph{deadlocks}, where circular dependencies between resources block the flow of a program.
 \Cref{lst:deadlockWG} shows one example of such a deadlock in a Go program.
 The problem is a \emph{blocking synchronization} where the \lstinline{group.Wait()} inside the for-loop is causing the block.
+This statement has to be moved outside the for loop to resolve the unintentional blocking and fix the concurrency bug.
 Although the error seems obvious in this case, those small mistakes can quickly happen and can get unrecognized into the production environment if not tested well enough.
 
 \begin{lstlisting}[float=h, language=Go, label=lst:deadlockCh, caption={Deadlock caused by misuse of an \emph{unbuffered Channel}}]
@@ -206,6 +212,8 @@ func main() {
 A second example of a deadlock that might not be obvious is \Cref{lst:deadlockCh} which uses two unbuffered channels to transfer information between threads.
 The problem here is that without an active listener on an unbuffered channel, any send action will be blocked.
 To fix this, one could replace the unbuffered channel with a buffered one so that the execution flow of the program can continue without blocking.
+This shows how important it is to know the concrete implementation of a concurrency abstraction.
+Even though intended to ease the synchronization between threads and make inter-thread communication safer, by not knowing the implementation of an abstraction the developer can unknowingly create hard to find concurrency bugs.
 
 Another common problem in event-driven concurrent programs are \emph{blocking operations} like filesystem operations that are executed inside an event-handler.
 These ``can penalize and even paralyze the entire program execution.''~\cite{tchamgoue2012testing}
@@ -229,7 +237,8 @@ They occur when multiple threads simultaneously try to access a shared variable 
 
 \Cref{lst:race} shows an example of a data race that is frequently found.~\cite{serebry2009threadsanitizer}
 The data race happens when ``two threads access a non-thread-safe complex object [e.g. a map] without synchronization.''~\cite{serebry2009threadsanitizer}
-Even though the two threads in this example write to different keys, this might cause a corruption of data or even crash the program because the default Go map is not concurrency-aware.
+Even though the two threads in this example write to different keys of the map \lstinline{m}, this might cause a corruption of data or even crash the program because the default Go map implementation is not concurrency-aware.
+To fix this, the access to the map needs to be synchronized by a lock for example.
 
 % TODO: Is it a data race or an atomicity violation?
 A special case of data races are multi-variable data races.
@@ -258,7 +267,8 @@ This often happens because:
 
 \Cref{lst:order} shows a common order violation bug pattern called ``Test-and-Use''.
 The programmer's intention is to check if a variable is not \lstinline{nil} and then use this variable.
-However, due to the thread that was launched before, it could happen that after the check in line 7, the thread of the goroutine gets scheduled and the data variable is set to \lstinline{nil}.
+However, due to the thread that was launched before, it could happen that after the \lstinline{if} check in line 7, the thread of the goroutine gets scheduled and the data variable is set to \lstinline{nil}.
+To fix this bug, the check and the usage of the variable need to become an atomic operation to enforce the order of execution.
 
 \begin{lstlisting}[float=h, language=Go, label=lst:atomicity, caption=Load-Store bug pattern -- Atomicity violation]
 func main() {
@@ -279,11 +289,15 @@ func main() {
 The programmer assumes that ++ is an atomic operation because it is one literal in Go.
 However, after compilation this is expanded to 3 instructions: LOAD, INCREMENT and finally STORE.
 The thread scheduler could switch the context after any of these instructions what leads to undefined behavior, when multiple threads try to increment the same variable.
+To fix this bug pattern, the \lstinline{++} operation also needs to be replaced by an atomic operation that does not allow other threads to access the \lstinline{sum} variable while incrementing.
 
 Lu, Park, Seo and Zhou conducted a study in 2008 where they analyzed the characteristics of real-world concurrency bugs.~\cite{lu2008mistakes}
 One key finding was that:
 ``Most of the examined non-deadlock concurrency bugs are covered by two simple patterns: atomicity-violation and order-violation''~\cite{lu2008mistakes}
 
+A promising solution to atomicity and order violation bugs is \emph{software transactional memory} (STM) as proposed by Peyton Jones.~\cite{peytonjones2007beautiful}
+It is an alternative to traditional lock-based synchronization where atomic regions get declared explicitly.
+Languages like Haskell provide STM by their design of language but Go can also utilize this mechanism by using external libraries.
 
 % ------------------------------------ %
 % ------ DYNAMIC CODE ANALYSIS ------- %
