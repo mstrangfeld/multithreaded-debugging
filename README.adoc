@@ -9,7 +9,7 @@ IMPORTANT: Work in progress! As soon as the paper is finished, there will be a P
 
 1. Introduction
 A. Heisenbugs
-B. Go Programming Language
+B. The Go Programming Language
 C. Table of Contents
 2. Taxonomy of Concurrency Bugs
 A. Deadlocks
@@ -84,6 +84,18 @@ C. Atomicity and Order Violations
 |Why do computers stop and what can be done about it?
 |gray1986computers
 |link:papers/gray1986computers.pdf[]
+
+|Static Deadlock Detection for Concurrent Go by Global Session Graph Synthesis
+|ng2016static
+|link:papers/ng2016static.pdf[]
+
+|Fencing off Go: Liveness and Safety for Channel-based Programming
+|lange2017fencing
+|link:papers/lange2017fencing.pdf[]
+
+|A Static Verification Framework for Message Passing in Go Using Behavioural Types
+|lange2018verification
+|link:papers/lange2018verification.pdf[]
 
 |===
 
