@@ -71,7 +71,7 @@ The techniques evaluated are:
     \item Dynamic code analysis with record and replay and dynamic data race detection.
     \item Concurrency-aware testing with a combined approach of evaluating thread schedules with delta-debugging to automatically pinpoint concurrency bugs.
     \item Static code analysis with the methods of sequentialization and model-checking.
-    \item Language and software design to avoid concurrency bugs
+    \item Language and software design to avoid concurrency bugs.
 \end{itemize}
 \end{abstract}
 
@@ -161,7 +161,7 @@ And finally, \Cref{sct:outlook} will provide a quick outlook on how the examined
     \label{fig:classes}
 \end{figure}
 
-\Cref{fig:classes} shows a taxonomy of concurrency bugs based on the work of Tchamgoue, Kim and Jun.~\cite{tchamgoue2012testing}
+\Cref{fig:classes} shows a taxonomy of concurrency bugs based on the work of Tchamgoue, Kim and Jun~\cite{tchamgoue2012testing}.
 They distinguish between two main categories of concurrency bugs: \emph{Blocking} and \emph{non-blocking}.
 Blocking bugs are bugs where the execution of a program is unintentionally blocked and the program cannot terminate.
 % TODO: Meh, don't know if that is right..
@@ -222,7 +222,7 @@ func main() {
 }
 \end{lstlisting}
 
-\Cref{lst:race} shows an example of a data race that is frequently found.~\cite{serebry2009threadsanitizer}
+\Cref{lst:race} shows an example of a data race that is frequently found~\cite{serebry2009threadsanitizer}.
 The data race happens when two threads access a non-thread-safe complex object [e.g. a map] without synchronization~\cite{serebry2009threadsanitizer}.
 Even though the two threads in this example write to different keys of the map \lstinline{data}, this might cause a corruption of data or even crash the program because the default Go map implementation is not concurrency-aware.
 To fix this, the access to the map needs to be synchronized, e.g. by a lock.
@@ -285,59 +285,70 @@ To fix this bug pattern, the \lstinline{++} operation also needs to be replaced 
 \section{Dynamic Code Analysis}
 \label{sct:dynamic}
 
+Assumed, a concurrency bug that rarely manifest gets deployed into production.
+How can it be found quickly?
+And once reported, how can it be reproduced easily for debugging purpose?
 One of the main techniques for finding concurrency bugs is dynamic code analysis.
-% TODO: Find better word for problematic
-In dynamic code analysis the runtime behavior of a program is observed to detect problematic patterns like unsynchronized variable accesses or deadlocks.
+In dynamic code analysis the runtime behavior of a program is observed to detect problematic patterns like un-synchronized variable accesses or deadlocks.
+Assumed, a bug is reported that does not manifest regularly, this technique can help to find the manifestation of the bug more easily during the debugging process.
+Additionally it could be used to observe deployments in production, so concurrency bugs get reported immediately as they occur.
 
-One popular implementation of this is ``Record and Replay'' where the path of execution of an application is recorded and can later be deterministically replayed.
-This way developers can easily find and fix those bug because, ``detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job.''~\cite{tchamgoue2012testing}
+\subsection{Record and Replay}
+One popular implementation of this technique is called ``Record and Replay'' where the path of execution of an application is recorded and can later be deterministically replayed.
 To create a recording that contains all information to replay a program exactly the same way it was executed, the recorder needs to keep track of the schedule of the program as well as all variables that might not be deterministically reproducible.
-Furthermore, any source of non-determinism such as the the interaction with the network or graphics card or any call to external libraries need to be recorded.~\cite{lidbury2019sparse}
-Like expected, this creates a lot of computational overhead in CPU time as well as storage.
-This approach also forms the foundation for many other techniques and has many different variants and implementations.
+Furthermore, any source of non-determinism such as the the interaction with the network or graphics card or any call to external libraries need to be recorded~\cite{lidbury2019sparse}.
+This creates a lot of computational overhead in CPU time as well as storage.
+This approach also forms the foundation for many other techniques and has many different variants and implementations~\cite{acm2002}~\cite{lidbury2019sparse}.
 
 To track the schedule of a natively compiled program such as Go programs, the record tool has to sit between the host operating system and the application.
 One requirement to use such a tool in production is the ease of deployability which means that the operational overhead should be very small.
-There have been approaches with custom hardware or patched operating system kernels to hijack the scheduler, but these setups are quite complex and not easy to deploy.
-One example for a tool that fulfills this requirement is \emph{rr}~\footnote{\url{https://rr-project.org/}} developed by \emph{Mozilla}.
-Their approach is to run the program to observe on a fixed CPU core and track the system calls by using \emph{\_ptrace\_}.
-This way they can record programs on an unmodified Linux system and without compiling instrumentation into the programs code which might affect the concurrency behavior.
-The main performance bottleneck beside the execution on only one CPU core, are the context switches induced by ptrace.~\cite{o2017engineering}
-Lidbury and Donaldson~\cite{lidbury2019sparse} examined further ways to reduce the computational overhead by a sparse recording approach.
-By selectively ignoring ``unimportant'' sources of non-determinism they were able to record input and output heavy applications like video games with an acceptable overhead where as \emph{rr} was not able to record at all due to the massive overhead of recording every source of non-determinism.
-During replay they execute the thread schedule as recorded and mock every source of recorded non-determinism but let the ignored regions of the program execute non-deterministically.
+There have been approaches with custom hardware or patched operating system kernels to hijack the scheduler, but these setups are quite complex and not easy to deploy~\cite{o2017engineering}.
+One example for a tool that fulfills this requirement is \emph{rr}~\cite{mozillarr} developed by \emph{Mozilla}.
+Their approach is to run the program to observe on a fixed CPU core and track the system calls by using \emph{ptrace}, which is a system call provided by the Linux kernel to inspect and observe processes.
+This way they can record programs on an unmodified Linux system, which increases the deployability of such a setup.
+With this approach they also do not need to modify the program itself with code instrumentation, where code is added to the program at compile time to observe it's runtime and which might affect the concurrency behavior.
+The main performance bottleneck beside the execution on only one CPU core, are the context switches induced by ptrace~\cite{o2017engineering}.
 
-Record and replay could therefore be a great tool to monitor applications in production.
-Once a bug occurs and is either reported by a user or by the program itself, the programmer could just replay the thread schedule to reproduce, find and therefore fix the bug quickly.
+Lidbury and Donaldson~\cite{lidbury2019sparse} examined further ways to reduce the computational overhead by a sparse recording approach.
+By selectively ignoring ``unimportant'' sources of non-determinism, like the exact layout of memory, they were able to record input- and output-heavy applications like video games with a decreased overhead whereas \emph{rr} was not able to record at all due to the massive overhead of recording every source of non-determinism.
+During replay they execute the thread schedule as recorded and mock every source of recorded non-determinism but let the ignored regions of the program execute non-deterministically.
+Ignoring sources of non-determinism does decrease the accuracy in which concurrency bugs can be replayed.
+But for real-world production usage one has to distinguish between the coverage of realistic bug occurrences and the checking of overall correctness of a program.
+In many cases it is more desirable to observe only one critical region of the code where concurrency bugs are either expected or could lead to serious issues than observing the entire program at once.
+The right balance between coverage and overhead has to be individually evaluated by the safety and speed requirements of a program.
+E.g. for a program that is used in a critical system like a banking environment, the developers should aim for a much higher coverage than for a regular web server, where speed is often more important than the overall correctness.
+
+Sparse Record and replay provides the ability to make these decisions and therefore adjust the needs to monitor applications in production.
+Once a bug occurs and is either reported by a user or by the program itself, the programmer could just replay the thread schedule to reproduce, find and therefore fix the bug quickly because, ``detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job''~\cite{tchamgoue2012testing}.
 Additionally, this technique can help to reproduce all kind of concurrency bugs, no matter if they are blocking or non-blocking.
 For programs that do not heavily depend on parallelism this approach is also very feasible.
-The tool \emph{rr} can record such programs with a performance overhead below the factor of two.
-However, for programs that heavily rely on parallelism the overhead to record and store the thread schedule and all necessary parameters can decrease the performance by more than a factor of 30.~\cite{o2017engineering}
-Especially for multi-threaded server applications that expect a high workload and where speed is crucial for the business, this approach is not feasible in production, yet.
+The tool \emph{rr} can record such programs with a performance overhead below the factor of two~\cite{o2017engineering}.
+However, for programs that heavily rely on parallelism the overhead to record and store the thread schedule and all necessary parameters can decrease the performance by more than a factor of 30~\cite{o2017engineering}.
+Especially for multi-threaded server applications that expect a high workload and where speed is crucial, this approach is not feasible in production, yet.
 And even if the workload is low but the application is time-sensitive for example because of protocol timeouts, it is not applicable without extending the acceptable timeouts.
 
+\subsection{Data Race Detection}
 Another set of tools for dynamic code analysis are dynamic data race detectors.
 As the name implies, these tools detect data races but because atomicity and order violations are often correlated, these tools can detect a variety of non-blocking concurrency bugs.
-There are multiple approaches for data race detection but in this case we refer to on-the-fly and post-mortem data race detection which are often referred to as dynamic.~\cite{serebry2009threadsanitizer}
-One data race detector that is mainly used for Go programs is the \emph{ThreadSanitizer} developed by Google.
+There are multiple approaches for data race detection but in this case we refer to on-the-fly and post-mortem data race detection which are typically referred to as dynamic~\cite{serebry2009threadsanitizer}.
+One data race detector that is mainly used for Go programs is the \emph{ThreadSanitizer} in version 2~\cite{threadSanitizer} developed by Google.
 It is built in the Golang compiler tool-chain and can be toggled with a simple compiler flag which makes it very easy to use.
-``The tool performs compile-time instrumentation of the source program, in which all (atomic and non-atomic) accesses to potentially shared locations, as well as fence operations, are instrumented with calls into a statically linked run-time library.''~\cite{lidbury2019sparse}
+The tool performs compile-time instrumentation of the source program, in which all (atomic and non-atomic) accesses to potentially shared locations, as well as fence operations, are instrumented with calls into a statically linked run-time library~\cite{lidbury2019sparse}.
 To distinguish between synchronized accesses and data races during runtime, the compiler also has to inject dynamic annotations into the program.
 With these annotations the data race detector understands the synchronization primitives used by the programming language.
-When the program along with the race detector gets executed, the data race detector ``observes the program execution as a sequence of events.''~\cite{serebry2009threadsanitizer}
-To detect a data race, there are two algorithms that are mainly used among all detectors: \emph{happens-before} and \emph{lockset}.
-Locking events are Write and Read Locks / Unlocks.
-Happens-before events are Signal and Wait.
-The \emph{ThreadSanitizer} uses an hybrid approach by combining both algorithms into one and observing events of both categories.
+When the program along with the race detector gets executed, the data race detector observes the program execution as a sequence of events~\cite{serebry2009threadsanitizer}.
+Each memory access is recorded and when receiving events for memory access it can report a potential race based on a \emph{state machine algorithm}~\cite{serebry2011llvm}.
 
-Performance-wise the race detection is unfortunately not better than the record and replay approach.
-The official race detector article on the Go website claims: ``The cost of race detection varies by program, but for a typical program, memory usage may increase by 5-10x and execution time by 2-20x.''~\cite{goRaceDetector}
-Which is in fact better than the original 20x-50x evaluated by Serebryany and Iskhodzhanov in 2009.~\cite{serebry2009threadsanitizer}
-However, a possible improvement could be to ignore certain uncritical regions and just observe hotspots where data races are suspected.
+Performance-wise, race detection is unfortunately not better than the record and replay approach.
+According to the official Go website: ``The cost of race detection varies by program, but for a typical program, memory usage may increase by 5-10x and execution time by 2-20x''~\cite{goRaceDetector}.
+Which is in fact a massive improvement from \emph{ThreadSanitizer} version 1 with an overhead of 20x-50x, which was evaluated by Serebryany and Iskhodzhanov in 2009~\cite{serebry2009threadsanitizer}.
+However, to improve this even further one possibility could be to ignore certain uncritical regions and just observe hotspots where data races are suspected, like in the sparse record and replay approach.
+The overall coverage of data races would decrease but the developers could have the choice balance speed and correctness according to the requirements.
 
-
-Beside their ease of use, one of the main disadvantages of dynamic analysis tools is their coverage, that `` [...] is typically small since only a few executions are explored.''~\cite{qadeer2004kiss}
-Additionally, they depend on the manifestation and especially the recognition of these bugs to report them correctly.
+Beside their ease of use, one of the main disadvantages of dynamic analysis tools is their bug coverage, that is typically small since only a few executions are explored~\cite{qadeer2004kiss}.
+These tools just observe and do not actively try to enforce a manifestation of bugs, so not every thread interleaving might be explored.
+Additionally, they depend on the the recognition of these bugs to report them correctly.
+While this is good to deploy them into a production setup to monitor an application, it is also desirable to prevent concurrency bugs before they can even get into production.
 
 
 % ------------------------------------ %
@@ -352,18 +363,19 @@ Additionally, they depend on the manifestation and especially the recognition of
     \label{fig:testing}
 \end{figure}
 
-Extensive testing has proven to minimize the bugs of software in production.\cite{makinen2014testing}
-However, traditional testing mostly covers sequential errors and cannot detect concurrency bugs effectively.\cite{lu2008mistakes}
-This lies in the nature of these bugs themself.
+To prevent concurrency bugs to get into production and eventually causing damage, the software should be tested for those bugs before.
+Extensive testing has proven to minimize the bugs of software in production~\cite{makinen2014testing}.
+However, traditional testing mostly covers sequential errors and cannot detect concurrency bugs effectively~\cite{lu2008mistakes}.
+This lies in the nature of these bugs themselves.
 When only certain thread interleavings trigger the bug, the tests could complete successfully almost every time without ever finding a manifestation.
-So, new concurrency-aware tests are needed to find concurrency bugs reliably.
+For lack of established terms we will use the term \emph{concurrency-aware testing} to describe the process of automatically finding concurrency bugs in a testing environment by intentionally manipulating the path of execution.
 
-One early attempt to test programs for concurrency bugs was to inject delays at random points in the program code, but it is yet unclear if this really gives an acceptable bug coverage.~\cite{lu2008mistakes}
+One early attempt to test programs for concurrency bugs was to inject delays at random points in the program code~\cite{bron2005coverage}, but it is yet unclear if this heuristic really gives an acceptable bug coverage~\cite{lu2008mistakes}.
 Furthermore, the tests should try to reduce the perturbation on the execution, so the software can be evaluated the same way as it would run in a regular deployment in production.
 
-Another method of concurrency-aware testing has been proposed by Choi and Zeller.\cite{acm2002}
-They implemented a tool called ``DEJAVU'' for the \emph{Jalapeño} Java Virtual Machine but the concept is also applicable to tools that work with Go or any other programming language.
-They make use of a technique called \emph{Delta debugging}, which describes the process of narrowing down the spot where a failure is introduced by going back and forth between working and non-working conditions, in this case working and non-working thread schedules.~\cite{zeller2002delta}
+Another method of concurrency-aware testing has been proposed by Choi and Zeller~\cite{acm2002}.
+They implemented a tool called ``DEJAVU''~\cite{acm2002} for the \emph{Jalapeño} Java Virtual Machine but the concept is also applicable to tools that work with Go or any other programming language.
+They make use of a technique called \emph{Delta debugging}, which describes the process of narrowing down the spot where a failure is introduced by going back and forth between working and non-working conditions, in this case working and non-working thread schedules~\cite{zeller2002delta}.
 \Cref{fig:testing} shows a modified model of the \emph{DEJAVU} approach, suited for Go programs by using rr instead of of \emph{DEJAVU} for the recording and replay of the thread schedule.
 As a prerequisite, test cases need to be created that define the expected behavior of the application.
 These can either succeed or fail which can be shown by the exit code for example.
@@ -373,14 +385,17 @@ The thread schedule is generated by the \emph{Schedule generator} and is replaye
 The schedule as well as the test result is passed back to the delta debugging unit.
 ``By systematically narrowing down the difference between a thread schedule that makes the program pass and another schedule that makes the program fail, the Delta Debugging approach can pinpoint the error location automatically -- namely the location(s) where a thread switch causes the program to fail.''~\cite{acm2002}
 
-While this technique cannot be used in a productive deployment setup, it is intended to extend existing tests that for example run inside a CI pipeline.
 One major drawback however, is the number of thread interleavings that can grow exponentially with the number of executed threads.
 But for most cases it is not necessary to evaluate all possible thread schedules.
-Lu et al. have found in their study of real-world concurrency bugs that ``Almost 96\% of the examined concurrency bugs are guaranteed to manifest if certain partial order between 2 threads is enforced.''~\cite{lu2008mistakes}
-Which means that ``Pairwise testing on concurrent program threads can expose most concurrency bugs, and greatly reduce the testing complexity.''~\cite{lu2008mistakes}
+Lu et al. have found in their study of real-world concurrency bugs that almost all concurrency bugs were guaranteed to manifest if a certain partial order between two threads is enforced~\cite{lu2008mistakes}.
+Which means that pairwise testing on concurrent program threads can expose most concurrency bugs, and greatly reduce the testing complexity~\cite{lu2008mistakes}.
 To increase the coverage of concurrency bugs, this approach could also be combined with a data race detector to dynamically detect data races within certain replays of a thread schedule.
 This way the test cases can be minimized to semantical correctness checks, which decreases the operational overhead for such a setup.
-The setup of such a system also comes with a relatively low operational overhead because once such a system is build, it could be easily embedded within the CI pipelines of a project.
+
+Concurrency-aware testing is very promising in the regard of extending an existing testing pipeline.
+This way concurrency bugs could be detected even before the software is deployed into production.
+The overhead can be minimized by optimizing the thread schedule generator and by ignoring most uncritical regions of the code.
+However, the coverage depends on the quality of the tests that also need to be aware of multi-variable semantic data races.
 
 
 % ------------------------------------ %
@@ -389,26 +404,28 @@ The setup of such a system also comes with a relatively low operational overhead
 \section{Static Code Analysis}
 \label{sct:static}
 
-Static code analysis describes the technique of predicting the behavior of a program by analyzing the source code without compiling nor executing it.
+Even though concurrency-aware testing can prevent some concurrency bugs to get in production, it would be even better if those bugs could be already detected during or before compile time.
+For this purpose static code analysis can be used.
+Static code analysis describes the technique of predicting the behavior of a program before it is run.
 
 A common approach to static code analysis is model-checking where the code gets translated into mathematical models such as state machines or graphs.
 But model checking for concurrent programs is complex due to the number of possible thread interleavings that can grow exponentially with the number of executed threads.
-Therefore, static data race detectors for example are unfeasible for very large code bases.~\cite{serebry2009threadsanitizer}
+Therefore, static data race detectors for example are unfeasible for very large code bases~\cite{serebry2009threadsanitizer}.
 
-One implementation of static code analysis to detect concurrency bugs is sequentialization as proposed by Qadeer and Wu.~\cite{qadeer2004kiss}
+One implementation of static code analysis to detect concurrency bugs is sequentialization as proposed by Qadeer and Wu~\cite{qadeer2004kiss}.
 Their approach is to transform a parallel program into a sequential one and simulate a large subset of the behavior of the parallel program on the sequential one.
 This way they can use traditional and highly optimized sequential model-checkers to analyze the application.
 By this approach the system has no false-positive reports on concurrency bugs but the overall coverage is not very high.
 
 Although unfeasible for detecting data races in large code bases, there are multiple implementations of static deadlock-detectors for concurrent programs.
-One concrete static deadlock detector for the Go programming language is called \emph{Godel Checker}.~\cite{godelChecker}
+One concrete static deadlock detector for the Go programming language is called \emph{Godel Checker}~\cite{godelChecker}.
 It uses that Go's message passing concurrency mechanisms by channels is ``[...] greatly inspired by advances in formal languages for concurrency theory known as process calculi.''~\cite{lange2018verification}
 The \emph{Godel Checker} tool extracts the main concurrency characteristics of the program into a mathematical model called \emph{Behavioural Types}.
 These types can be further processed into a \emph{static single assignment}, which then can be processed by classical model and termination checker.
 This way not only total deadlocks where all threads are stuck, but also partial deadlocks and channel safety threats can be found.
 
 The computational overhead for this approach is also surprisingly low.
-A program with 18 kLOC can be checked within minutes.~\cite{lange2018verification}
+A program with 18 kLOC can be checked within minutes~\cite{lange2018verification}.
 Unfortunately this technique has quite a few limitations.
 Only immutable Go channels are supported that are not located in a dynamic data type.
 Furthermore, Go does not force the developer to use synchronization by message passing, so any deadlocks introduced by traditional locking mechanisms will be not be noticed.
@@ -420,6 +437,7 @@ Furthermore, Go does not force the developer to use synchronization by message p
 \label{sct:outlook}
 A study conducted by Tu, Liu, Song and Zhan analyzed popular Go projects and their concurrency bugs.
 They came to the conclusion that \emph{message passing} produced even more errors than \emph{shared memory}.
+
 
 Lu, Park, Seo and Zhou conducted a study in 2008 where they analyzed the characteristics of real-world concurrency bugs~\cite{lu2008mistakes}.
 One key finding was that:
@@ -444,11 +462,6 @@ Dynamic data race detectors could eventually be optimized to an acceptable overh
 Beside that, ``data-race free does not mean concurrency bug free.''~\cite{lu2008mistakes}
 The main advantage of the dynamic approach is that it theoretically could be deployed to a real production environment.
 For programs that are mainly event-driven this would give the ability to observe the real-world behavior in a reproducible way.
-
-Concurrency-aware testing is very promising in the regard of extending an existing testing pipeline.
-This way concurrency bugs could be detected even before the software is deployed into production.
-The overhead can be minimized by optimizing the thread schedule generator and by ignoring most uncritical regions of the code.
-However, the coverage depends on the quality of the tests that also need to be aware of multi-variable semantic data races.
 
 Static code analysis is only feasible in small code bases, due to the exponentially growing thread interleavings that need to be explored, which requires a lot of computational overhead.
 Additionally multi-variable accesses of only semantically correlated variables need manual annotations or configuration.
