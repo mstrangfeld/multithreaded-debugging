@@ -64,14 +64,14 @@
 \begin{abstract}
 Concurrency bugs are often hard to find and therefore hard to fix.
 In this paper we evaluate different techniques and tools that are currently available to effectively find, fix and avoid concurrency bugs.
-These tools should be easy to use, they should bring only a minimal computational and storage overhead and they should have a high coverage with minimal false-positive reports.
+These tools should be easy to use, they should operate with a minimal computational and storage overhead and they should have a high coverage with minimal false-positive reports.
 In short: These tools should be production-ready and applicable to real-world software projects.
 The techniques evaluated are:
 \begin{itemize}
     \item Dynamic code analysis with record and replay and dynamic data race detection.
-    \item Concurrency-aware testing with a combined approach of evaluating thread schedules with delta-debugging to automatically pinpoint concurrency bugs.
+    \item Concurrency-aware testing with the approach of evaluating thread schedules with delta-debugging to automatically pinpoint concurrency bugs.
     \item Static code analysis with the methods of sequentialization and model-checking.
-    \item Language and software design to avoid concurrency bugs when writing software.
+    \item Programming language and software design to avoid concurrency bugs when writing software.
 \end{itemize}
 \end{abstract}
 
@@ -116,18 +116,18 @@ Heisenbugs are bugs that only manifest within very specific thread interleavings
 The complexity and uncertainty of concurrency bugs is also the reason for many studies that examine how these bugs occur and explore different ways on how to detect, fix and avoid them~\cite{tu2019go}.
 Thus, numerous tools and techniques have been developed that propose different solutions to solve the problem of concurrency bugs and accelerate the debugging process.
 
-This paper will evaluate some of these techniques and tools and how they can be used to ease the process of debugging concurrent bugs.
+In this paper we evaluate some of these techniques and tools and how they can be used to ease the process of debugging concurrent bugs.
 The main focus is to detect bugs efficiently in production, which means that developers should be able to fix bugs with a minimum amount of work and time.
 Also, the manifestation of concurrency bugs should be reported immediately with minimal overhead of computational resources.
 For all of this it is also desirable to have a maximum amount of coverage with only minimal false-positive reports.
 
 \subsection{The Go Programming Language}
-The increasing demand for parallel programs has also lead to the development of new programming languages which specialize on this task.
-The goal of these languages is to ease the usage of parallel programming patterns so developers can use it more often without writing extensively more code.
-Additionally they try to avoid the creation of concurrency bugs by their design of language which will be evaluated in \cref{sct:outlook}.
-One example for such a language is Go which is a statically typed programming language developed by Google, which compiles down to single native binaries.
+The increasing demand for parallel programs has also lead to the development of new programming languages which specialize in this task.
+The goal of these languages is to ease the usage of parallel programming patterns, so developers can use them more often without writing extensively more code.
+Additionally, they try to avoid the creation of concurrency bugs by their design of language which will be evaluated in \cref{sct:outlook}.
+One example for such a language is Go which is a statically typed programming language developed by Google, that compiles down to single native binaries.
 Go recently gained a lot of popularity for the purpose of writing highly concurrent programs.
-Popular open-source projects like \emph{Kubernetes}\footnote{\url{https://kubernetes.io/}}, \emph{Docker}\footnote{\url{https://www.docker.com/}} or \emph{Prometheus}\footnote{\url{https://prometheus.io/}} are all written in Go.
+Popular open-source projects like \emph{Kubernetes}\footnote{\url{https://kubernetes.io/}}, \emph{Docker}\footnote{\url{https://www.docker.com/}} and \emph{Prometheus}\footnote{\url{https://prometheus.io/}} are all written in Go.
 The official documentation of Go states: ``[... Go's] concurrency mechanisms make it easy to write programs that get the most out of multicore and networked machines [...]''~\cite{goDocs}.
 Go abstracts the creation of threads by using lightweight \emph{goroutines}, which can be created by using the \lstinline{go} keyword followed by a named or anonymous function.
 The Go runtime maps these goroutines to normal Kernel threads during execution.
@@ -143,7 +143,7 @@ Together with the increasing popularity of the language, the demand for producti
 
 The further structure of this paper continues as follows:
 \Cref{sct:taxonomy} gives a brief introduction on the different types of concurrency bugs and their main causes.
-\Cref{sct:dynamic} covers some techniques to dynamically detect concurrency bugs, reliably reproduce them.
+\Cref{sct:dynamic} covers some techniques to dynamically detect concurrency bugs and reliably reproduce them.
 \Cref{sct:testing} shows different methods of concurrency-aware testing to detect concurrency bugs automatically in a testing environment.
 \Cref{sct:static} covers how to detect concurrency bugs with static code analysis.
 And finally, \Cref{sct:outlook} will provide a quick outlook on how the examined tools can be used together as well as other promising technologies that might help avoiding concurrency bugs in the future.
@@ -249,8 +249,7 @@ func main() {
 \end{lstlisting}
 
 Atomicity and order violations are concurrency bugs where the interleaving of threads violates the programmer's intention of atomicity and order.
-% TODO: cite test and use
-\Cref{lst:order} shows a common order violation bug pattern called ``Test-and-Use''.
+\Cref{lst:order} shows a common order violation bug pattern called ``Test-and-Use''~\cite{farchi2003patterns}.
 The programmer's intention is to check if a variable is not \lstinline{nil} and then use this variable.
 However, due to the thread that was launched before, it could happen that after the \lstinline{if} check in line 7, the thread of the goroutine gets scheduled and the data variable is set to \lstinline{nil}.
 To fix this bug, the check and the usage of the variable need to become an atomic operation to enforce the order of execution.
@@ -270,8 +269,7 @@ func main() {
 }
 \end{lstlisting}
 
-% TODO: cite load-store
-\Cref{lst:atomicity} shows one example of the infamous ``Load-Store'' bug pattern.
+\Cref{lst:atomicity} shows one example of the infamous ``Load-Store'' bug pattern~\cite{farchi2003patterns}.
 The programmer might have assumed that \lstinline{++} is an atomic operation because it is one literal in Go.
 However, after compilation, this is expanded to 3 instructions: LOAD, INCREMENT and finally STORE.
 The thread scheduler could switch the context after any of these instructions.
@@ -351,7 +349,7 @@ However, one of the main disadvantages of dynamic analysis tools is their bug co
 These tools just observe and do not actively try to enforce a manifestation of bugs, so not every thread interleaving might be explored.
 Additionally, they depend on the the recognition of these bugs to report them correctly.
 Programs that heavily rely on multi-threaded execution like web-servers can also become very inefficient or could even fail due to timeout limitations.
-To avoid the overhead in the production environment and to find concurrency bugs in programs that could not be observed easily, it is desirable to prevent concurrency bugs before they can even get into production.
+To avoid the overhead in the production environment and to find concurrency bugs in programs that could not be observed easily, it is desirable to find concurrency bugs before they can even get into production.
 
 
 % ------------------------------------ %
@@ -396,7 +394,7 @@ To increase the coverage of concurrency bugs, this approach could also be combin
 This way the test cases can be minimized to semantical correctness checks, which decreases the operational overhead for such a setup.
 
 Concurrency-aware testing is very promising in the regard of extending an existing testing pipeline.
-This way concurrency bugs could be detected even before the software is deployed into production.
+This way concurrency bugs could be detected even before the software gets deployed into production.
 The overhead can be minimized by optimizing the thread schedule generator and by ignoring most uncritical regions of the code.
 However, the coverage depends on the quality of the tests that also need to be aware of multi-variable semantic data races.
 
@@ -479,7 +477,7 @@ Record and replay could also be deployed to just some replicas of an instance, r
 
 Although there is a variety of tools that try to ease the process of multi-threaded debugging, as shown, none of them really fulfills all requirements for a production-ready drop-in solution.
 But there are multiple techniques that can be combined to at least get some support in debugging multi-threaded applications.
-In all of this the developers always have to decide if safety or speed is more important for their application and adjust the tools to these needs.
+In all of this the developers always have to decide if safety and overall correctness or speed is more important for their application and adjust the tools to these needs.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
