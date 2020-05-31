@@ -64,14 +64,14 @@
 \begin{abstract}
 Concurrency bugs are often hard to find and therefore hard to fix.
 In this paper we evaluate different techniques and tools that are currently available to effectively find, fix and avoid concurrency bugs.
-The requirements for these tools are that they need to be easy to use, they should bring only a minimal computational and storage overhead and they should have a high coverage with minimal false-positive reports.
+These tools should be easy to use, they should bring only a minimal computational and storage overhead and they should have a high coverage with minimal false-positive reports.
 In short: These tools should be production-ready and applicable to real-world software projects.
 The techniques evaluated are:
 \begin{itemize}
     \item Dynamic code analysis with record and replay and dynamic data race detection.
     \item Concurrency-aware testing with a combined approach of evaluating thread schedules with delta-debugging to automatically pinpoint concurrency bugs.
     \item Static code analysis with the methods of sequentialization and model-checking.
-    \item Language and software design to avoid concurrency bugs.
+    \item Language and software design to avoid concurrency bugs when writing software.
 \end{itemize}
 \end{abstract}
 
@@ -95,7 +95,7 @@ The techniques evaluated are:
 % Motivation
 Today's computer architectures rely more and more on parallel computing.
 Single core processors were widely replaced by multi-core architectures optimized to run processes and threads concurrently.
-To utilize the full performance of the given hardware, programmers need to write their software with a high degree of parallelism.
+To utilize the full performance of the given hardware, developers need to write their software with a high degree of parallelism.
 In contrast to sequential programs which only have one deterministic path through the program code, concurrent programs have multiple paths of execution that are executed independently from each other.
 The order in which these threads are executed is determined by the operating system's scheduler.
 The resulting order of thread executions is often referred to as \emph{thread interleavings}.
@@ -109,10 +109,10 @@ In 1986 Jim Gray introduced the term ``Heisenbug'' for these kind of software fa
 He wrote:
 
 \begin{quote}
-``But Heisenbugs may elude a bugcatcher for years of execution. Indeed, the bugcatcher may perturb the situation just enough to make the Heisenbug disappear.''\cite{gray1986computers}
+``[...] Heisenbugs may elude a bugcatcher for years of execution. Indeed, the bugcatcher may perturb the situation just enough to make the Heisenbug disappear.''\cite{gray1986computers}
 \end{quote}
 
-Heisenbugs are bugs that only occur with very specific thread interleavings that might not occur when a bugcatcher evaluates the program.
+Heisenbugs are bugs that only manifest within very specific thread interleavings that might not occur when a bugcatcher evaluates the program.
 The complexity and uncertainty of concurrency bugs is also the reason for many studies that examine how these bugs occur and explore different ways on how to detect, fix and avoid them~\cite{tu2019go}.
 Thus, numerous tools and techniques have been developed that propose different solutions to solve the problem of concurrency bugs and accelerate the debugging process.
 
@@ -124,11 +124,11 @@ For all of this it is also desirable to have a maximum amount of coverage with o
 \subsection{The Go Programming Language}
 The increasing demand for parallel programs has also lead to the development of new programming languages which specialize on this task.
 The goal of these languages is to ease the usage of parallel programming patterns so developers can use it more often without writing extensively more code.
-Additionally they try to avoid the creation of concurrency bugs by their design of language which will be evaluated in the Outlook section.
+Additionally they try to avoid the creation of concurrency bugs by their design of language which will be evaluated in \cref{sct:outlook}.
 One example for such a language is Go which is a statically typed programming language developed by Google, which compiles down to single native binaries.
 Go recently gained a lot of popularity for the purpose of writing highly concurrent programs.
 Popular open-source projects like \emph{Kubernetes}\footnote{\url{https://kubernetes.io/}}, \emph{Docker}\footnote{\url{https://www.docker.com/}} or \emph{Prometheus}\footnote{\url{https://prometheus.io/}} are all written in Go.
-In the official documentation of Go states: ``[... Go's] concurrency mechanisms make it easy to write programs that get the most out of multicore and networked machines [...]''~\cite{goDocs}
+The official documentation of Go states: ``[... Go's] concurrency mechanisms make it easy to write programs that get the most out of multicore and networked machines [...]''~\cite{goDocs}.
 Go abstracts the creation of threads by using lightweight \emph{goroutines}, which can be created by using the \lstinline{go} keyword followed by a named or anonymous function.
 The Go runtime maps these goroutines to normal Kernel threads during execution.
 Go encourages programmers to use concurrency by \emph{message passing}, which is assumed to be safer and more convenient to use than \emph{shared memory}.
@@ -190,19 +190,19 @@ func main() {
 }
 \end{lstlisting}
 
-An example of a deadlock in a Go program that might not be obvious is \Cref{lst:deadlockCh} which uses unbuffered channels to transfer information between threads.
+An example of a deadlock in a Go program that might not be obvious is shown in \cref{lst:deadlockCh}, where unbuffered channels are used to transfer information between threads.
 Go channels can either be buffered or unbuffered.
 With unbuffered channels the sender thread has to wait until a second thread is ready to receive the message.
-With the buffered channel the message gets buffered and the sender thread can continue it's execution immediately as long as the buffer is not full.
-In the first two lines of the main method the two unbuffered channels \lstinline{data} and \lstinline{done} are created to send data to the thread and to receive information when the execution of the thread is done.
-Using the arrow notation data can be either send into a channel (line 4) or data can be received from a channel (line 6)
+With buffered channels the message gets buffered and the sender thread can continue it's execution immediately as long as the buffer is not full.
+In the first two lines of the main method of \cref{lst:deadlockCh}, the two unbuffered channels \lstinline{data} and \lstinline{done} are created to send data to the thread and to receive information when the execution of the thread is done.
+Using the arrow notation, data can either be send into a channel (line 4) or data can be received from a channel (line 6).
 The bug in this case is that without an active listener on an unbuffered channel, any send action will be blocked.
 To fix this, one could replace the unbuffered channel with a buffered one, so that the execution flow of the program can continue without blocking.
 This shows how important it is to know the concrete implementation of a concurrency abstraction.
 Even though intended to ease the synchronization between threads and make inter-thread communication safer, by not knowing the implementation of an abstraction the developer can unknowingly create hard to find concurrency bugs.
 
 Another common problem in event-driven concurrent programs are \emph{blocking operations} like filesystem operations that are executed inside an event-handler.
-These ``can penalize and even paralyze the entire program execution.''~\cite{tchamgoue2012testing}
+These can penalize and even paralyze the entire program execution~\cite{tchamgoue2012testing}.
 
 \subsection{Data Races}
 
@@ -223,7 +223,7 @@ func main() {
 \end{lstlisting}
 
 \Cref{lst:race} shows an example of a data race that is frequently found~\cite{serebry2009threadsanitizer}.
-The data race happens when two threads access a non-thread-safe complex object [e.g. a map] without synchronization~\cite{serebry2009threadsanitizer}.
+The data race happens when two threads access a non-thread-safe complex object (e.g. a map) without synchronization.
 Even though the two threads in this example write to different keys of the map \lstinline{data}, this might cause a corruption of data or even crash the program because the default Go map implementation is not concurrency-aware.
 To fix this, the access to the map needs to be synchronized, e.g. by a lock.
 
@@ -285,7 +285,7 @@ To fix this bug pattern, the \lstinline{++} operation also needs to be replaced 
 \section{Dynamic Code Analysis}
 \label{sct:dynamic}
 
-Assumed, a concurrency bug that rarely manifest gets deployed into production.
+Assumed, a concurrency bug that rarely manifests, gets deployed into production.
 How can it be found quickly?
 And once reported, how can it be reproduced easily for debugging purpose?
 One of the main techniques for finding concurrency bugs is dynamic code analysis.
@@ -303,7 +303,7 @@ This approach also forms the foundation for many other techniques and has many d
 To track the schedule of a natively compiled program such as Go programs, the record tool has to sit between the host operating system and the application.
 One requirement to use such a tool in production is the ease of deployability which means that the operational overhead should be very small.
 There have been approaches with custom hardware or patched operating system kernels to hijack the scheduler, but these setups are quite complex and not easy to deploy~\cite{o2017engineering}.
-One example for a tool that fulfills this requirement is \emph{rr}~\cite{mozillarr} developed by \emph{Mozilla}.
+One example for a tool that fulfills the requirements is \emph{rr}~\cite{mozillarr} developed by \emph{Mozilla}.
 Their approach is to run the program to observe on a fixed CPU core and track the system calls by using \emph{ptrace}, which is a system call provided by the Linux kernel to inspect and observe processes.
 This way they can record programs on an unmodified Linux system, which increases the deployability of such a setup.
 With this approach they also do not need to modify the program itself with code instrumentation, where code is added to the program at compile time to observe it's runtime and which might affect the concurrency behavior.
@@ -319,7 +319,7 @@ The right balance between coverage and overhead has to be individually evaluated
 E.g. for a program that is used in a critical system like a banking environment, the developers should aim for a much higher coverage than for a regular web server, where speed is often more important than the overall correctness.
 
 Sparse Record and replay provides the ability to make these decisions and therefore adjust the needs to monitor applications in production.
-Once a bug occurs and is either reported by a user or by the program itself, the programmer could just replay the thread schedule to reproduce, find and therefore fix the bug quickly because, ``detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job''~\cite{tchamgoue2012testing}.
+Once a bug occurs and is either reported by a user or by the program itself, the developer could just replay the thread schedule to reproduce, find and therefore fix the bug quickly because, ``detecting concurrency bugs is difficult but once detected; correcting them is somehow an easy job''~\cite{tchamgoue2012testing}.
 Additionally, this technique can help to reproduce all kind of concurrency bugs, no matter if they are blocking or non-blocking.
 For programs that do not heavily depend on parallelism this approach is also very feasible.
 The tool \emph{rr} can record such programs with a performance overhead below the factor of two~\cite{o2017engineering}.
@@ -332,7 +332,7 @@ Another set of tools for dynamic code analysis are dynamic data race detectors.
 As the name implies, these tools detect data races but because atomicity and order violations are often correlated, these tools can detect a variety of non-blocking concurrency bugs.
 There are multiple approaches for data race detection but in this case we refer to on-the-fly and post-mortem data race detection which are typically referred to as dynamic~\cite{serebry2009threadsanitizer}.
 One data race detector that is mainly used for Go programs is the \emph{ThreadSanitizer} in version 2~\cite{threadSanitizer} developed by Google.
-It is built in the Golang compiler tool-chain and can be toggled with a simple compiler flag which makes it very easy to use.
+It is build into the Golang compiler tool-chain and can be toggled with a simple compiler flag which makes it very easy to use.
 The tool performs compile-time instrumentation of the source program, in which all (atomic and non-atomic) accesses to potentially shared locations, as well as fence operations, are instrumented with calls into a statically linked run-time library~\cite{lidbury2019sparse}.
 To distinguish between synchronized accesses and data races during runtime, the compiler also has to inject dynamic annotations into the program.
 With these annotations the data race detector understands the synchronization primitives used by the programming language.
@@ -343,12 +343,15 @@ Performance-wise, race detection is unfortunately not better than the record and
 According to the official Go website: ``The cost of race detection varies by program, but for a typical program, memory usage may increase by 5-10x and execution time by 2-20x''~\cite{goRaceDetector}.
 Which is in fact a massive improvement from \emph{ThreadSanitizer} version 1 with an overhead of 20x-50x, which was evaluated by Serebryany and Iskhodzhanov in 2009~\cite{serebry2009threadsanitizer}.
 However, to improve this even further one possibility could be to ignore certain uncritical regions and just observe hotspots where data races are suspected, like in the sparse record and replay approach.
-The overall coverage of data races would decrease but the developers could have the choice balance speed and correctness according to the requirements.
+The overall coverage of data races would decrease but the developers could have the choice of balancing speed and correctness according to the requirements.
 
-Beside their ease of use, one of the main disadvantages of dynamic analysis tools is their bug coverage, that is typically small since only a few executions are explored~\cite{qadeer2004kiss}.
+The main advantage of the dynamic approach is that it theoretically could be deployed to a real production environment.
+For programs that are mainly event-driven this would give the ability to observe the real-world behavior in a reproducible way.
+However, one of the main disadvantages of dynamic analysis tools is their bug coverage, that is typically small since only a few executions are explored~\cite{qadeer2004kiss}.
 These tools just observe and do not actively try to enforce a manifestation of bugs, so not every thread interleaving might be explored.
 Additionally, they depend on the the recognition of these bugs to report them correctly.
-While this is good to deploy them into a production setup to monitor an application, it is also desirable to prevent concurrency bugs before they can even get into production.
+Programs that heavily rely on multi-threaded execution like web-servers can also become very inefficient or could even fail due to timeout limitations.
+To avoid the overhead in the production environment and to find concurrency bugs in programs that could not be observed easily, it is desirable to prevent concurrency bugs before they can even get into production.
 
 
 % ------------------------------------ %
@@ -419,7 +422,7 @@ By this approach the system has no false-positive reports on concurrency bugs bu
 
 Although unfeasible for detecting data races in large code bases, there are multiple implementations of static deadlock-detectors for concurrent programs.
 One concrete static deadlock detector for the Go programming language is called \emph{Godel Checker}~\cite{godelChecker}.
-It uses that Go's message passing concurrency mechanisms by channels is ``[...] greatly inspired by advances in formal languages for concurrency theory known as process calculi.''~\cite{lange2018verification}
+It uses that Go's message passing concurrency mechanisms by channels is inspired by advances in formal languages for concurrency theory known as process calculi~\cite{lange2018verification}.
 The \emph{Godel Checker} tool extracts the main concurrency characteristics of the program into a mathematical model called \emph{Behavioural Types}.
 These types can be further processed into a \emph{static single assignment}, which then can be processed by classical model and termination checker.
 This way not only total deadlocks where all threads are stuck, but also partial deadlocks and channel safety threats can be found.
@@ -430,22 +433,43 @@ Unfortunately this technique has quite a few limitations.
 Only immutable Go channels are supported that are not located in a dynamic data type.
 Furthermore, Go does not force the developer to use synchronization by message passing, so any deadlocks introduced by traditional locking mechanisms will be not be noticed.
 
+Static code analysis is only feasible in small code bases, due to the exponentially growing thread interleavings that need to be explored, which requires a lot of computational overhead.
+Additionally multi-variable accesses of only semantically correlated variables need manual annotations or configuration.
+``Unfortunately, existing techniques cannot effectively extract such semantic correlations. Traditional compiler analysis cannot catch them, because many correlated variables are just semantically correlated and do not necessarily have data dependencies [...]''~\cite{lu2007muvi}.
+
+
 % ------------------------------------ %
 % -------------- OUTLOOK ------------- %
 % ------------------------------------ %
 \section{Outlook}
 \label{sct:outlook}
-A study conducted by Tu, Liu, Song and Zhan analyzed popular Go projects and their concurrency bugs.
-They came to the conclusion that \emph{message passing} produced even more errors than \emph{shared memory}.
 
+All the techniques shown can find concurrency bugs with different coverage based on the overhead one is willing to pay.
+As seen, there is not a single tool that fulfills all the requirements for an optimal production usage.
+Either the overhead is very big or the coverage is quite small.
+To get the most out of these tools, a combined approach seems to make sense to get the most coverage with the least overhead.
 
-Lu, Park, Seo and Zhou conducted a study in 2008 where they analyzed the characteristics of real-world concurrency bugs~\cite{lu2008mistakes}.
-One key finding was that:
-``Most of the examined non-deadlock concurrency bugs are covered by two simple patterns: atomicity-violation and order-violation''~\cite{lu2008mistakes}
+For the goal of having no concurrency bugs at all in a production deployment with nearly no overhead, it would be desirable to have techniques that make it impossible to even write incorrect concurrent programs.
+New languages and language features have been developed for this task.
+Go as presented before is one of those languages that tries to make the use of concurrent patterns safer.
+One of their main approaches is to encourage developers to synchronize threads via easy to use \emph{message passing}, namely channels.
+A study conducted by Tu, Liu, Song and Zhan~\cite{tu2019go} analyzed popular real-world Go projects and their concurrency bugs.
+They came to the surprising conclusion that \emph{message passing} produced even more errors than \emph{shared memory}.
+So, synchronization via \emph{message passing} does not seem to be the right solution to decrease concurrency bugs.
 
 A promising solution to atomicity and order violation bugs is \emph{software transactional memory} (STM) as proposed by Peyton Jones~\cite{peytonjones2007beautiful}.
 It is an alternative to traditional lock-based synchronization where atomic regions get declared explicitly.
+This way STM is one possibility to ensure that there are no side-effects of atomic operations and no data races.
 Languages like Haskell provide STM by their design of language but Go can also utilize this mechanism by using external libraries.
+Lu, Park, Seo and Zhou~\cite{lu2008mistakes} conducted a study in 2008 where they analyzed the characteristics of real-world concurrency bugs.
+One of their key finding was that most of the examined non-deadlock concurrency bugs were covered by atomicity-violation or order-violation patterns.
+Their conclusion is that using STM could have avoided about one third of the examined concurrency bugs.
+
+Combining all this with the ongoing trend of using micro-service architectures over big monoliths, these tools could get a lot more useful because the code bases of each service tend to get smaller.
+This means that the overhead of instrumenting, testing or model-checking one service gets smaller in absolute numbers.
+This way teams can decide more easily which applications need to have a higher concurrency bug coverage and which applications can be ignored.
+Record and replay could also be deployed to just some replicas of an instance, reducing the impact on speed whilst collecting useful information to optimize the whole code base.
+
 
 % ------------------------------------ %
 % ------------ CONCLUSION ------------ %
@@ -453,32 +477,9 @@ Languages like Haskell provide STM by their design of language but Go can also u
 \section{Conclusion}
 \label{sct:conclusion}
 
-While having multi-threaded applications is convenient and also necessary in today's world of computation, the non-determinism makes it hard to find, reproduce and therefore fix concurrency bugs.
 Although there is a variety of tools that try to ease the process of multi-threaded debugging, as shown, none of them really fulfills all requirements for a production-ready drop-in solution.
-
-Dynamic code analysis has the main disadvantage that it can cost a lot of overhead when monitoring is active in a production environment.
-Especially programs that heavily rely on multi-threaded execution like web-servers  can become very inefficient or could even fail due to timeout limitations.
-Dynamic data race detectors could eventually be optimized to an acceptable overhead by ignoring most of the assumed-to-be-safe code regions, but this also drastically lowers the overall coverage.
-Beside that, ``data-race free does not mean concurrency bug free.''~\cite{lu2008mistakes}
-The main advantage of the dynamic approach is that it theoretically could be deployed to a real production environment.
-For programs that are mainly event-driven this would give the ability to observe the real-world behavior in a reproducible way.
-
-Static code analysis is only feasible in small code bases, due to the exponentially growing thread interleavings that need to be explored, which requires a lot of computational overhead.
-Additionally multi-variable accesses of only semantically correlated variables need manual annotations or configuration.
-``Unfortunately, existing techniques cannot effectively extract such semantic correlations. Traditional compiler analysis cannot catch them, because many correlated variables are just semantically correlated and do not necessarily have data dependencies, [...]''~\cite{lu2007muvi}
-Beside that there are some promising tools for statically finding deadlocks by translating programs into a mathematical model.
-
-Concluding this paper, the evaluation of the different approaches shows that there is not one tool to solve all problems that arise when writing concurrent programs.
 But there are multiple techniques that can be combined to at least get some support in debugging multi-threaded applications.
-
-However, for modern micro-service architectures that get more and more popular, these tools could actually be useful because the code bases tend to get smaller.
-That means that the overhead of instrumenting, testing or model-checking these applications gets smaller in absolute numbers.
-Record and replay could also be deployed to just some replicas of an instance, reducing the impact on crucial business speed whilst collecting useful information to optimize the whole code base.
-
-But then again, detecting and reporting concurrency bugs is just the first step in fixing them.
-Developers need to understand the reporting and need to distinguish between real bugs and false-positives.
-So, ``There is no silver bullet for fixing concurrency bugs.''~\cite{lu2008mistakes}
-
+In all of this the developers always have to decide if safety or speed is more important for their application and adjust the tools to these needs.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
