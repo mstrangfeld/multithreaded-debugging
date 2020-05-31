@@ -97,6 +97,10 @@ C. Atomicity and Order Violations
 |lange2018verification
 |link:papers/lange2018verification.pdf[]
 
+|Dynamic Race Detection with LLVM Compiler
+|serebry2011llvm
+|link:papers/serebry2011llvm.pdf[]
+
 |===
 
 
