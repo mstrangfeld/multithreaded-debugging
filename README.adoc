@@ -3,8 +3,6 @@
 
 Author: Marvin Strangfeld <marvin.strangfeld[at]rwth-aachen.de>
 
-IMPORTANT: Work in progress! As soon as the paper is finished, there will be a PDF to download in the release section
-
 == Outline
 
 1. Introduction
@@ -102,18 +100,6 @@ C. Atomicity and Order Violations
 |link:papers/serebry2011llvm.pdf[]
 
 |===
-
-
-== Topics to write about
-* data race bugs and detection
-* deadlock bugs and detection
-* atomicity-violation bugs
-* order-violation bugs
-* transactional memory in language design
-** Can it prevent concurrency bugs?
-* Famous concurrency bugs
-** Therac-25
-** Northeast blackout of 2003
 
 == Quotes
 * "If debugging is the process of removing software bugs, then programming must be the process of putting them in." ~ Edsger W. Dijkstra
